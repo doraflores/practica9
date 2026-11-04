@@ -1,6 +1,6 @@
-package org.example.practica9;
+package org.example.practica9.Modelo;
 
-public class Personaje implements Destruible, ElementoDinamico{
+public class Personaje implements Destruible, ElementoDinamico {
     private String nombre;
     private int vida;
     private int posicionX;

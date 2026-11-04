@@ -1,7 +1,6 @@
-package org.example.practica9;
-;
+package org.example.practica9.Modelo;
 
-public class Utileria implements ElementoDinamico{
+public class Utileria implements ElementoDinamico {
     private String nombre;
     private String descripcion;
     private int posicionX;

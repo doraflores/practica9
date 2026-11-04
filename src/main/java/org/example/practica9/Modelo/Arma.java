@@ -1,4 +1,4 @@
-package org.example.practica9;
+package org.example.practica9.Modelo;
 
 
 public class Arma implements Inventariable {

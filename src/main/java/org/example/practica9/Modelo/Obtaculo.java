@@ -1,6 +1,6 @@
-package org.example.practica9;
+package org.example.practica9.Modelo;
 
-public class Obtaculo implements Destruible{
+public class Obtaculo implements Destruible {
     private String nombre;
     private int dano;
     private int posicionX;

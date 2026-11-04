@@ -1,6 +1,6 @@
-package org.example.practica9;
+package org.example.practica9.Modelo;
 
-public class Recompensa implements Inventariable{
+public class Recompensa implements Inventariable {
     private String nombre;
     private int valor;
     private String tipo;
