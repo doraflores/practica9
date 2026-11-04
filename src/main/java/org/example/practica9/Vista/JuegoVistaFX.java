@@ -11,6 +11,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -19,14 +20,17 @@ import javafx.stage.Stage;
 import org.example.practica9.Controlador.JuegoControlador;
 import org.example.practica9.Modelo.Inventariable;
 
+public class JuegoVistaFX extends Application {
 
-public class JuegoVistaFX extends Application{
     private JuegoControlador controlador;
     private Pane mapa;
     private StackPane exploradorGrafico;
     private TextArea areaEstado;
 
-    private final int TAMANO_CELDA = 35;
+    private final int TAMANO_CELDA = 30;
+    // Offset para que la posición (0,0) esté centrada en el tablero (450x450)
+    private final int OFFSET_X = 210;
+    private final int OFFSET_Y = 210;
 
     public JuegoVistaFX() {
         super();
@@ -39,9 +43,9 @@ public class JuegoVistaFX extends Application{
 
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(15));
-        root.setStyle("-fx-background-color: #1e1e2e;"); // Fondo oscuro tipo juego
+        root.setStyle("-fx-background-color: #1e1e2e;");
 
-        // --- CABECERA / TÍTULO ---
+        // --- CABECERA ---
         HBox header = new HBox();
         header.setPadding(new Insets(0, 0, 15, 0));
         header.setAlignment(Pos.CENTER);
@@ -51,36 +55,32 @@ public class JuegoVistaFX extends Application{
         header.getChildren().add(titulo);
         root.setTop(header);
 
-        // --- CENTRO: ÁREA DEL MAPA (GRID RETICULADO) ---
+        // --- MAPA DEL JUEGO ---
         mapa = new Pane();
         mapa.setPrefSize(450, 450);
         mapa.setStyle(
                 "-fx-background-color: #272a37;" +
-                "-fx-border-color: #45475a;" +
-                "-fx-border-width: 2px;" +
-                "-fx-border-radius: 8px;" +
-                "-fx-background-radius: 8px;"
+                        "-fx-border-color: #45475a;" +
+                        "-fx-border-width: 2px;" +
+                        "-fx-border-radius: 8px;" +
+                        "-fx-background-radius: 8px;"
         );
 
         dibujarCuadriculaFondo();
-        dibujarObstaculosYCheckpoints();
+        dibujarElementosDelJuego();
 
-        // Personaje mejorado: Círculo con borde y etiqueta "E"
+        // Crear y posicionar al explorador
         exploradorGrafico = crearAvatarPersonaje();
-        actualizarPosicionGrafica(
-                controlador.getExplorador().getPosicionX(),
-                controlador.getExplorador().getPosicionY()
-        );
+        actualizarPosicionExplorador();
         mapa.getChildren().add(exploradorGrafico);
 
         root.setCenter(mapa);
 
-        // --- PANEL DERECHO: CONTROLES Y CONSOLA DE EVENTOS ---
-        VBox panelDerecho = new VBox(15);
+        // --- 3. PANEL DE CONTROLES ---
+        VBox panelDerecho = new VBox(12);
         panelDerecho.setPadding(new Insets(0, 0, 0, 15));
         panelDerecho.setPrefWidth(240);
 
-        // Control Pad (Cruceta de dirección)
         VBox boxMovimiento = new VBox(8);
         boxMovimiento.setAlignment(Pos.CENTER);
         boxMovimiento.setStyle("-fx-background-color: #313244; -fx-padding: 12; -fx-background-radius: 8;");
@@ -111,16 +111,14 @@ public class JuegoVistaFX extends Application{
 
         boxMovimiento.getChildren().addAll(lblMover, pad);
 
-        // Botón de Inventario
         Button btnInventario = new Button("Ver Inventario");
         btnInventario.setMaxWidth(Double.MAX_VALUE);
         btnInventario.setStyle(
                 "-fx-background-color: #89b4fa; -fx-text-fill: #11111b; " +
-                        "-fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 6;"
+                        "-fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 6; -fx-cursor: hand;"
         );
         btnInventario.setOnAction(e -> mostrarInventario());
 
-        // Consola de Texto/Eventos
         areaEstado = new TextArea();
         areaEstado.setEditable(false);
         areaEstado.setWrapText(true);
@@ -131,12 +129,12 @@ public class JuegoVistaFX extends Application{
                         "-fx-focus-color: transparent; " +
                         "-fx-text-fill: #a6adc8;"
         );
-        areaEstado.setText("¡Aventura iniciada!\nUtiliza la cruceta para moverte.\n");
+        areaEstado.setText("¡Aventura iniciada!\nUsa la cruceta para moverte.\n");
 
         panelDerecho.getChildren().addAll(boxMovimiento, btnInventario, areaEstado);
         root.setRight(panelDerecho);
 
-        Scene scene = new Scene(root, 730, 520);
+        Scene scene = new Scene(root, 730, 530);
         primaryStage.setTitle("Juego Explorador - JavaFX");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -149,13 +147,13 @@ public class JuegoVistaFX extends Application{
                 "-fx-background-color: #45475a; -fx-text-fill: #cdd6f4; " +
                         "-fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"
         );
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #585b70; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 6;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #45475a; -fx-text-fill: #cdd6f4; -fx-font-weight: bold; -fx-background-radius: 6;"));
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #585b70; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #45475a; -fx-text-fill: #cdd6f4; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"));
         return btn;
     }
 
     private StackPane crearAvatarPersonaje() {
-        Circle cuerpo = new Circle(14, Color.web("#a6e3a1"));
+        Circle cuerpo = new Circle(13, Color.web("#a6e3a1"));
         cuerpo.setStroke(Color.web("#40a02b"));
         cuerpo.setStrokeWidth(2);
 
@@ -164,12 +162,11 @@ public class JuegoVistaFX extends Application{
         inicial.setFill(Color.web("#11111b"));
 
         StackPane avatar = new StackPane(cuerpo, inicial);
-        avatar.setEffect(new DropShadow(8, Color.web("#a6e3a1")));
+        avatar.setEffect(new DropShadow(10, Color.web("#a6e3a1")));
         return avatar;
     }
 
     private void dibujarCuadriculaFondo() {
-        // Lineas tenue para formar la rejilla del mapa
         for (int i = 0; i <= 450; i += TAMANO_CELDA) {
             Rectangle lineaH = new Rectangle(450, 1, Color.web("#313244"));
             lineaH.setY(i);
@@ -179,39 +176,77 @@ public class JuegoVistaFX extends Application{
         }
     }
 
-    private void dibujarObstaculosYCheckpoints() {
-        // Obstáculo Roca (Cuadrado con estilo)
-        StackPane rocaNode = crearElementoMapa("🪨", Color.web("#f38ba8"), 3, 5);
-        // Checkpoint Fogata (Círculo con estilo)
-        StackPane fogataNode = crearElementoMapa("🔥", Color.web("#fab387"), 10, 10);
+    private void dibujarElementosDelJuego() {
+        // --- OBSTÁCULOS (Rojo / Marrón) ---
+        // Roca Gigante (x:3, y:5)
+        mapa.getChildren().add(crearFiguraGrafica("ROCA", Color.web("#f38ba8"), 3, 5));
+        // Árbol Caído (x:6, y:2)
+        mapa.getChildren().add(crearFiguraGrafica("TRONCO", Color.web("#eba0ac"), 6, 2));
 
-        mapa.getChildren().addAll(rocaNode, fogataNode);
+        // --- CHECKPOINTS (Naranja / Amarillo) ---
+        // Fogata (x:10, y:10)
+        mapa.getChildren().add(crearFiguraGrafica("FOGATA", Color.web("#fab387"), 10, 10));
+        // Campamento (x:20, y:20) -> Nota: si sobrepasa la cuadrícula, ajustamos a x:7, y:7
+        mapa.getChildren().add(crearFiguraGrafica("CAMP", Color.web("#f9e2af"), 7, 7));
+
+        // --- UTILERÍA (Verde / Violeta) ---
+        // Árbol Decorativo (x:1, y:1)
+        mapa.getChildren().add(crearFiguraGrafica("ARBOL", Color.web("#94e2d5"), 1, 1));
+        // Flor (x:2, y:4)
+        mapa.getChildren().add(crearFiguraGrafica("FLOR", Color.web("#cba6f7"), 2, 4));
     }
 
-    private StackPane crearElementoMapa(String emoji, Color colorBorde, int gridX, int gridY) {
-        Rectangle fondo = new Rectangle(28, 28, Color.web("#313244"));
-        fondo.setArcWidth(6);
-        fondo.setArcHeight(6);
-        fondo.setStroke(colorBorde);
-        fondo.setStrokeWidth(1.5);
+    private StackPane crearFiguraGrafica(String tipo, Color color, int gridX, int gridY) {
+        StackPane nodo = new StackPane();
 
-        Text txt = new Text(emoji);
-        txt.setFont(Font.font(14));
+        switch (tipo) {
+            case "ROCA":
+                Rectangle roca = new Rectangle(22, 22, color);
+                roca.setArcWidth(6);
+                roca.setArcHeight(6);
+                nodo.getChildren().add(roca);
+                break;
 
-        StackPane nodo = new StackPane(fondo, txt);
-        nodo.setLayoutX(10 + (gridX * TAMANO_CELDA));
-        nodo.setLayoutY(10 + (gridY * TAMANO_CELDA));
+            case "TRONCO":
+                Rectangle tronco = new Rectangle(26, 12, color);
+                tronco.setArcWidth(4);
+                tronco.setArcHeight(4);
+                nodo.getChildren().add(tronco);
+                break;
+
+            case "FOGATA":
+                Polygon fuego = new Polygon(0.0, 0.0, 10.0, -18.0, 20.0, 0.0);
+                fuego.setFill(color);
+                nodo.getChildren().add(fuego);
+                break;
+
+            case "ARBOL":
+                Polygon pino = new Polygon(0.0, 0.0, 12.0, -22.0, 24.0, 0.0);
+                pino.setFill(color);
+                nodo.getChildren().add(pino);
+                break;
+
+            case "FLOR":
+                Circle flor = new Circle(8, color);
+                nodo.getChildren().add(flor);
+                break;
+
+            default: // Campamento u otros
+                Rectangle base = new Rectangle(20, 20, color);
+                nodo.getChildren().add(base);
+                break;
+        }
+
+        // Convertir coordenadas del modelo a pixeles usando el Offset del mapa
+        nodo.setLayoutX(OFFSET_X + (gridX * TAMANO_CELDA) + 3);
+        nodo.setLayoutY(OFFSET_Y + (gridY * TAMANO_CELDA) + 3);
         return nodo;
     }
 
     private void mover(String direccion) {
         int distancia = 1;
         controlador.moverExplorador(direccion, distancia);
-
-        actualizarPosicionGrafica(
-                controlador.getExplorador().getPosicionX(),
-                controlador.getExplorador().getPosicionY()
-        );
+        actualizarPosicionExplorador();
 
         areaEstado.appendText("> Movido a (" +
                 controlador.getExplorador().getPosicionX() + ", " +
@@ -219,9 +254,13 @@ public class JuegoVistaFX extends Application{
         );
     }
 
-    private void actualizarPosicionGrafica(int x, int y) {
-        exploradorGrafico.setLayoutX(10 + (x * TAMANO_CELDA));
-        exploradorGrafico.setLayoutY(10 + (y * TAMANO_CELDA));
+    private void actualizarPosicionExplorador() {
+        int x = controlador.getExplorador().getPosicionX();
+        int y = controlador.getExplorador().getPosicionY();
+
+        // Se calcula la posición gráfica respetando el centro del mapa
+        exploradorGrafico.setLayoutX(OFFSET_X + (x * TAMANO_CELDA) + 2);
+        exploradorGrafico.setLayoutY(OFFSET_Y + (y * TAMANO_CELDA) + 2);
     }
 
     private void mostrarInventario() {
