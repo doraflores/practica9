@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -18,7 +19,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.example.practica9.Controlador.JuegoControlador;
-import org.example.practica9.Modelo.Inventariable;
+import org.example.practica9.Modelo.*;
 
 public class JuegoVistaFX extends Application {
 
@@ -177,23 +178,34 @@ public class JuegoVistaFX extends Application {
     }
 
     private void dibujarElementosDelJuego() {
-        // --- OBSTÁCULOS (Rojo / Marrón) ---
-        // Roca Gigante (x:3, y:5)
-        mapa.getChildren().add(crearFiguraGrafica("ROCA", Color.web("#f38ba8"), 3, 5));
-        // Árbol Caído (x:6, y:2)
-        mapa.getChildren().add(crearFiguraGrafica("TRONCO", Color.web("#eba0ac"), 6, 2));
+        // OBSTÁCULOS (Rojo / Marrón)
+        // Roca Gigante, Árbol Caído
+        // Dibujar Obstáculos desde la lista del Nivel
+        for (Obtaculo obstaculos : controlador.getNivelActual().getObtaculos()) {
+            Color color = obstaculos.getNombre().startsWith("Roca") ? Color.web("#f38ba8") : Color.web("#eba0ac");
+            String figura = obstaculos.getNombre().startsWith("Roca") ? "ROCA" : "TRONCO";
+            mapa.getChildren().add(crearFiguraGrafica(figura, color, obstaculos.getPosicionX(), obstaculos.getPosicionY()));
+        }
 
-        // --- CHECKPOINTS (Naranja / Amarillo) ---
-        // Fogata (x:10, y:10)
-        mapa.getChildren().add(crearFiguraGrafica("FOGATA", Color.web("#fab387"), 10, 10));
-        // Campamento (x:20, y:20) -> Nota: si sobrepasa la cuadrícula, ajustamos a x:7, y:7
-        mapa.getChildren().add(crearFiguraGrafica("CAMP", Color.web("#f9e2af"), 7, 7));
+        // CHECKPOINTS (Naranja / Amarillo)
+        // Fogata, Campamento
+        // Dibujar CheckPoints desde la lista del Nivel
+        for (CheckPoint checkpoint : controlador.getNivelActual().getCheckPoints()) {
+            Color color = checkpoint.getNombre().equals("Fogata") ? Color.web("#fab387") : Color.web("#f9e2af");
+            mapa.getChildren().add(crearFiguraGrafica("FOGATA", color, checkpoint.getPosicionX(), checkpoint.getPosicionY()));
+        }
 
-        // --- UTILERÍA (Verde / Violeta) ---
-        // Árbol Decorativo (x:1, y:1)
-        mapa.getChildren().add(crearFiguraGrafica("ARBOL", Color.web("#94e2d5"), 1, 1));
-        // Flor (x:2, y:4)
-        mapa.getChildren().add(crearFiguraGrafica("FLOR", Color.web("#cba6f7"), 2, 4));
+        // UTILERÍA (Verde / Violeta)
+        // Árbol Decorativo, Flor
+        // Dibujar Utilería desde Elementos Dinámicos
+        for (ElementoDinamico elementoDinamico : controlador.getNivelActual().getElementosDinamicos()) {
+            if (elementoDinamico instanceof Utileria) {
+                Utileria utileria = (Utileria) elementoDinamico; //[cite: 10]
+                Color color = utileria.getNombre().startsWith("Arbol") ? Color.web("#94e2d5") : Color.web("#cba6f7");
+                String figura = utileria.getNombre().startsWith("Arbol") ? "ARBOL" : "FLOR";
+                mapa.getChildren().add(crearFiguraGrafica(figura, color, utileria.getPosicionX(), utileria.getPosicionY()));
+            }
+        }
     }
 
     private StackPane crearFiguraGrafica(String tipo, Color color, int gridX, int gridY) {
@@ -244,14 +256,21 @@ public class JuegoVistaFX extends Application {
     }
 
     private void mover(String direccion) {
-        int distancia = 1;
-        controlador.moverExplorador(direccion, distancia);
+        if (controlador.isJuegoTerminado()){
+            return;
+        }
+        controlador.moverExplorador(direccion, 1);
         actualizarPosicionExplorador();
-
-        areaEstado.appendText("> Movido a (" +
-                controlador.getExplorador().getPosicionX() + ", " +
-                controlador.getExplorador().getPosicionY() + ")\n"
+        // actualizar historial con posicion y vida actual
+        areaEstado.appendText("> " + controlador.getExplorador().getNombre() +
+                " en (" + controlador.getExplorador().getPosicionX() + ", " +
+                controlador.getExplorador().getPosicionY() + ") | Vida: " +
+                controlador.getExplorador().getVida() + "\n"
         );
+        // si se ha cumplido la condición se acaba el juego
+        if (controlador.isJuegoTerminado()){
+            mostrarPantallaFinDelJuego(controlador.getMensajeFinal());
+        }
     }
 
     private void actualizarPosicionExplorador() {
@@ -264,11 +283,23 @@ public class JuegoVistaFX extends Application {
     }
 
     private void mostrarInventario() {
-        areaEstado.appendText("\n=== INVENTARIO ===\n");
+        areaEstado.appendText("\nINVENTARIO\n");
         for (Inventariable item : controlador.getInventario().getItems()) {
             areaEstado.appendText("• " + item.toString() + "\n");
         }
-        areaEstado.appendText("===================\n\n");
+        areaEstado.appendText("...................................\n\n");
+    }
+
+    private void mostrarPantallaFinDelJuego(String mensaje){
+        areaEstado.appendText("\n................................\n");
+        areaEstado.appendText(mensaje + "\n");
+        areaEstado.appendText("\n.................................\n");
+        boolean esGanador = mensaje.contains("VICTORIA");
+        Alert alert = new Alert(esGanador ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+        alert.setTitle(esGanador ? "¡Nivel completado!" : "Juego terminado");
+        alert.setHeaderText(esGanador ? "¡Felicidades Exporador!" : "Has muerto en la aventura");
+        alert.setContentText(mensaje + "\n\nLa partida ha finalizado.");
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {

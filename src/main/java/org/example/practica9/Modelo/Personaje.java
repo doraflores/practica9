@@ -56,10 +56,10 @@ public class Personaje implements Destruible, ElementoDinamico {
         // mueve el personaje según dirección(norte, sur, este, oeste) y distancia
         switch (direccion.toLowerCase()){
             case "norte":
-                posicionY += distancia;
+                posicionY -= distancia;
                 break;
             case "sur":
-                posicionY -= distancia;
+                posicionY += distancia;
                 break;
             case "este":
                 posicionX += distancia;
@@ -78,5 +78,9 @@ public class Personaje implements Destruible, ElementoDinamico {
         // metodo que ejecuta la logica de destruccion del elemento
         vida = 0;
         System.out.println("El personaje " + nombre + " ha sido destruido.");
+    }
+
+    public boolean estaVivo(){
+        return vida > 0;
     }
 }

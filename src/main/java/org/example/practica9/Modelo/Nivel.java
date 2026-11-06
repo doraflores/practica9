@@ -76,4 +76,17 @@ public class Nivel {
             inventario.listarItems();
         }
     }
+
+    // getters añadidos
+    public List<Obtaculo> getObtaculos(){
+        return obtaculos;
+    }
+
+    public List<CheckPoint> getCheckPoints(){
+        return checkPoints;
+    }
+
+    public List<ElementoDinamico> getElementosDinamicos(){
+        return elementosDinamicos;
+    }
 }
