@@ -1,9 +1,6 @@
 package org.example.practica9;
 
-import javafx.application.Application;
-import org.example.practica9.Controlador.JuegoControlador;
 import org.example.practica9.Vista.JuegoVista;
-import org.example.practica9.Vista.JuegoVistaFX;
 
 /**
  * Juego: Explorador
@@ -18,7 +15,7 @@ public class Main {
         // JuegoControlador juego = new JuegoControlador();
         // 13juego.iniciarJuego();
 
-        // JuegoVista vista = new JuegoVista();
-        // vista.iniciar();
+        JuegoVista vista = new JuegoVista();
+        vista.iniciar();
     }
 }

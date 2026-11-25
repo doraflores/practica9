@@ -33,4 +33,8 @@ public class CheckPoint {
         activado = true;
         System.out.println("CheckPoint '" + nombre + "' ha sido activado en la posición (" + posicionX + ", " + posicionY + ").");
     }
+
+    public void setActivado(boolean activado){
+        this.activado = activado;
+    }
 }

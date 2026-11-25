@@ -1,7 +1,6 @@
 package org.example.practica9.Vista;
 
 import org.example.practica9.Controlador.JuegoControlador;
-
 import java.util.Scanner;
 
 public class JuegoVista {

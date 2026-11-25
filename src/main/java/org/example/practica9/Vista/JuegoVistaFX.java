@@ -1,5 +1,6 @@
 package org.example.practica9.Vista;
 
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,8 +19,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.practica9.Controlador.JuegoControlador;
 import org.example.practica9.Modelo.*;
+
 
 public class JuegoVistaFX extends Application {
 
@@ -94,11 +97,29 @@ public class JuegoVistaFX extends Application {
         pad.setHgap(6);
         pad.setVgap(6);
         pad.setAlignment(Pos.CENTER);
-
+        // botones para mover al explorador
         Button btnNorte = crearBotonDireccion("▲");
         Button btnSur   = crearBotonDireccion("▼");
         Button btnEste  = crearBotonDireccion("►");
         Button btnOeste = crearBotonDireccion("◄");
+        // boton para desplegar inventario
+        Button btnInventario = new Button("Ver Inventario");
+        btnInventario.setMaxWidth(Double.MAX_VALUE);
+        btnInventario.setStyle(
+                "-fx-background-color: #89b4fa; -fx-text-fill: #11111b; " +
+                        "-fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 6; -fx-cursor: hand;"
+        );
+        // boton para reiniciar partdida
+        Button btnReiniciar = new Button("Nueva Partida");
+        btnReiniciar.setMaxWidth(Double.MAX_VALUE);
+        btnReiniciar.setStyle("-fx-background-color: #a6e3a1; -fx-text-fill: #11111b; " + "-fx-font-weight: bold; -fx-padding: 8 15; " +
+                "-fx-background-radius: 6; -fx-cursor: hand;"
+        );
+        // boton para atacar con el arma
+        Button btnAtacar = new Button("Atacar");
+        btnAtacar.setMaxWidth(Double.MAX_VALUE);
+        btnAtacar.setStyle("-fx-background-color: #e78284; -fx-text-fill: #11111b; " +
+                "-fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 6; -fx-cursor: hand;");
 
         pad.add(btnNorte, 1, 0);
         pad.add(btnOeste, 0, 1);
@@ -109,16 +130,18 @@ public class JuegoVistaFX extends Application {
         btnSur.setOnAction(e -> mover("sur"));
         btnEste.setOnAction(e -> mover("este"));
         btnOeste.setOnAction(e -> mover("oeste"));
-
-        boxMovimiento.getChildren().addAll(lblMover, pad);
-
-        Button btnInventario = new Button("Ver Inventario");
-        btnInventario.setMaxWidth(Double.MAX_VALUE);
-        btnInventario.setStyle(
-                "-fx-background-color: #89b4fa; -fx-text-fill: #11111b; " +
-                        "-fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 6; -fx-cursor: hand;"
-        );
+        // boton para desplegar inventario
         btnInventario.setOnAction(e -> mostrarInventario());
+        // boton para reiniciar partida
+        btnReiniciar.setOnAction(e -> {
+            controlador.reiniciarPartida();
+            actualizarPosicionExplorador();
+            refrescarMapa();
+            areaEstado.setText("Nueva partida generada desde (0, 0).\n");
+        });
+        // boton para atacar con el arma
+        btnAtacar.setOnAction(e -> atacarObstaculo());
+        boxMovimiento.getChildren().addAll(lblMover, pad);
 
         areaEstado = new TextArea();
         areaEstado.setEditable(false);
@@ -132,7 +155,7 @@ public class JuegoVistaFX extends Application {
         );
         areaEstado.setText("¡Aventura iniciada!\nUsa la cruceta para moverte.\n");
 
-        panelDerecho.getChildren().addAll(boxMovimiento, btnInventario, areaEstado);
+        panelDerecho.getChildren().addAll(boxMovimiento, btnAtacar, btnInventario, btnReiniciar, areaEstado);
         root.setRight(panelDerecho);
 
         Scene scene = new Scene(root, 730, 530);
@@ -182,9 +205,11 @@ public class JuegoVistaFX extends Application {
         // Roca Gigante, Árbol Caído
         // Dibujar Obstáculos desde la lista del Nivel
         for (Obtaculo obstaculos : controlador.getNivelActual().getObtaculos()) {
-            Color color = obstaculos.getNombre().startsWith("Roca") ? Color.web("#f38ba8") : Color.web("#eba0ac");
-            String figura = obstaculos.getNombre().startsWith("Roca") ? "ROCA" : "TRONCO";
-            mapa.getChildren().add(crearFiguraGrafica(figura, color, obstaculos.getPosicionX(), obstaculos.getPosicionY()));
+            if(!obstaculos.isDestruido()){
+                Color color = obstaculos.getNombre().startsWith("Roca") ? Color.web("#f38ba8") : Color.web("#eba0ac");
+                String figura = obstaculos.getNombre().startsWith("Roca") ? "ROCA" : "TRONCO";
+                mapa.getChildren().add(crearFiguraGrafica(figura, color, obstaculos.getPosicionX(), obstaculos.getPosicionY()));
+            }
         }
 
         // CHECKPOINTS (Naranja / Amarillo)
@@ -259,18 +284,63 @@ public class JuegoVistaFX extends Application {
         if (controlador.isJuegoTerminado()){
             return;
         }
+        int vidaAntes = controlador.getExplorador().getVida();
         controlador.moverExplorador(direccion, 1);
         actualizarPosicionExplorador();
-        // actualizar historial con posicion y vida actual
-        areaEstado.appendText("> " + controlador.getExplorador().getNombre() +
-                " en (" + controlador.getExplorador().getPosicionX() + ", " +
-                controlador.getExplorador().getPosicionY() + ") | Vida: " +
-                controlador.getExplorador().getVida() + "\n"
-        );
-        // si se ha cumplido la condición se acaba el juego
+        refrescarMapa(); // encaso de que destruiste un obstaculo
+
+        // mostrar mensaje  de checkpoint si ocurrio
+        String evento = controlador.consumirUltimoEvento();
+        if (!evento.isEmpty()){
+            areaEstado.appendText(evento + "\n");
+        }
+        // si la vida se restauro (volvio a 100), significa que murio y reaparecio en el checkpoint
+        if (vidaAntes > 0 && controlador.getExplorador().getVida() == 100 && vidaAntes < 100){
+            areaEstado.appendText("¡HAS MUERTO! Reapareciendo en el último checkpoin con 100 HP\n");
+        }else{
+            areaEstado.appendText("> " + controlador.getExplorador().getNombre() + " en (" + controlador.getExplorador().getPosicionX() + ", " + controlador.getExplorador().getPosicionY() + ") | Vida: " + controlador.getExplorador().getVida() + "\n" );
+        }
+
         if (controlador.isJuegoTerminado()){
             mostrarPantallaFinDelJuego(controlador.getMensajeFinal());
         }
+    }
+
+    private void atacarObstaculo(){
+        if (controlador.isJuegoTerminado()){
+            return;
+        }
+        Obtaculo objetivo = controlador.usarArmaParaDestruir();
+        if (objetivo != null) {
+            // calcular pixeles de origen (Explorador) y destino (Obstaculo)
+            double origenX = exploradorGrafico.getLayoutX() + 13;
+            double origenY = exploradorGrafico.getLayoutY() + 13;
+            double destinoX = OFFSET_X + (objetivo.getPosicionX() * TAMANO_CELDA) + 15;
+            double destinoY = OFFSET_Y + (objetivo.getPosicionY() * TAMANO_CELDA) + 15;
+            // crear el golpe visual (proyectil)
+            Circle golpe = new Circle(6, Color.web("#f9e2af"));
+            golpe.setEffect(new DropShadow(10, Color.web("#fab387")));
+            golpe.setLayoutX(origenX);
+            golpe.setLayoutY(origenY);
+            mapa.getChildren().add(golpe);
+            // mover el golpe hacia el obstaculo y borrar ambos al llegar
+            TranslateTransition animacion = new TranslateTransition(Duration.millis(250), golpe);
+            animacion.setByX(destinoX - origenX);
+            animacion.setByY(destinoY - origenY);
+            animacion.setOnFinished(e -> {
+                mapa.getChildren().remove(golpe);
+                refrescarMapa(); // redibuja el mapa sin el obstaculo
+                areaEstado.appendText("¡Destruiste " + objetivo.getNombre() + "!\n");
+            });
+            animacion.play();
+        }
+    }
+
+    private void refrescarMapa(){
+        mapa.getChildren().clear();
+        dibujarCuadriculaFondo();
+        dibujarElementosDelJuego();
+        mapa.getChildren().add(exploradorGrafico);
     }
 
     private void actualizarPosicionExplorador() {
@@ -289,6 +359,8 @@ public class JuegoVistaFX extends Application {
         }
         areaEstado.appendText("...................................\n\n");
     }
+
+
 
     private void mostrarPantallaFinDelJuego(String mensaje){
         areaEstado.appendText("\n................................\n");

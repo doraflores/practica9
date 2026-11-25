@@ -3,6 +3,7 @@ package org.example.practica9.Controlador;
 import org.example.practica9.Modelo.*;
 
 import java.util.Random;
+import java.io.*;
 
 public class JuegoControlador {
     private Nivel nivelActual;
@@ -10,8 +11,23 @@ public class JuegoControlador {
     private Inventario inventario;
     private boolean juegoTerminado;
     private String mensajeFinal = "";
+    private String ultimoEvento = "";
+
+    // guardar posición de reaparición
+    private int reaX = 0;
+    private int reaY = 0;
+    private boolean tieneCheckpointActivo = false;
 
     public void iniciarJuego(){
+        this.juegoTerminado = false;
+        this.mensajeFinal = "";
+
+        if (Persistencia.cargarEstadoJuego(this)){
+            this.ultimoEvento = "La partida continúa en el ultimo checkpoint activado (" + explorador.getPosicionX() + ", " + explorador.getPosicionY() + ")";
+            return;
+        }
+
+        // Si no existe archivo previo, es decir que no se guardo ninguna partida, creamos una desde (0,0)
         // creando inventario
         this.inventario = new Inventario(10);
         // Creando armas
@@ -32,10 +48,13 @@ public class JuegoControlador {
         this.nivelActual = new Nivel("Bosque Verde", 1, "Fácil", this.inventario);
         nivelActual.agregarElementoDinamico(explorador);
 
-        this.juegoTerminado = false;
-        this.mensajeFinal = "";
+        this.reaX = 0;
+        this.reaY = 0;
+        this.tieneCheckpointActivo = false;
 
         generarElementosEnElTablero();
+        // guardar la configuracion inicial generada
+        guardarProgresoEnElArchivo();
     }
 
     private void generarElementosEnElTablero() {
@@ -156,17 +175,26 @@ public class JuegoControlador {
         // Interacción con Obstáculos
         for (Obtaculo obstaculo : nivelActual.getObtaculos()) {
             if (obstaculo.getPosicionX() == x && obstaculo.getPosicionY() == y) {
-                obstaculo.destruye();
                 explorador.recibirDano(obstaculo.getDano());
-                System.out.println("¡Colisionaste con " + obstaculo.getNombre() + "! Recibiste " + obstaculo.getDano() + " de daño.");
+                this.ultimoEvento = "¡Chocaste con " + obstaculo.getNombre() + "! (-" + obstaculo.getDano() + " HP";
             }
         }
 
         // Interacción con Checkpoints
         for (CheckPoint checkPoint : nivelActual.getCheckPoints()) {
-            if (checkPoint.getPosicionX() == x && checkPoint.getPosicionY() == y && !checkPoint.isActivado()) {
-                checkPoint.activar();
-                System.out.println("¡Has llegado al checkpoint: " + checkPoint.getNombre() + "!");
+            if (checkPoint.getPosicionX() == x && checkPoint.getPosicionY() == y) {
+                if (!checkPoint.isActivado()){
+                    checkPoint.activar();
+                    this.ultimoEvento = "¡Checkpoint '" + checkPoint.getNombre() + "' activado! Posición guardada";
+                }else{
+                    this.ultimoEvento = "Punto de control '" + checkPoint.getNombre() + "' guardado";
+                }
+                reaX = x;
+                reaY = y;
+                this.tieneCheckpointActivo = true;
+
+                // guardar automaticamente la posicion de este checkpoint en el archivo
+                guardarProgresoEnElArchivo();
             }
         }
 
@@ -181,10 +209,16 @@ public class JuegoControlador {
             }
         }
 
-        // condicion de derrota
-        if(explorador.getVida() <= 0){
-            juegoTerminado = true;
-            mensajeFinal = "GAME OVER";
+        // restaurar vida al morir depues de haber activado checkpoint o derrota si no se activo
+        if (explorador.getVida() <= 0){
+            if (tieneCheckpointActivo){
+                System.out.println("¡Has muerto! Reapareciendo en el último checkpoint activado...");
+                explorador.restaurarVida(100);
+                explorador.setPosicion(reaX, reaY);
+            }else{
+                juegoTerminado = true;
+                mensajeFinal = "GAME OVER: Moriste antes de alcanzar un punto de control.";
+            }
             return;
         }
 
@@ -198,7 +232,7 @@ public class JuegoControlador {
         }
         if (todosCheckpointsActivados){
             juegoTerminado = true;
-            mensajeFinal = "¡VICTORIA!";
+            mensajeFinal = "¡VICTORIA! Has activado todos los checkpoints del mapa";
         }
     }
 
@@ -210,4 +244,63 @@ public class JuegoControlador {
         return mensajeFinal;
     }
 
+    public Obtaculo usarArmaParaDestruir(){
+        if(juegoTerminado){
+            return null;
+        }
+        // verificar si el personaje tiene un arma en el inventario
+        Arma armaEquipada = null;
+        for (Inventariable item : inventario.getItems()){
+            if (item instanceof Arma){
+                armaEquipada = (Arma) item;
+                break;
+            }
+        }
+        if (armaEquipada == null){
+            return null; // no hay armas en el inventario
+        }
+
+        int px = explorador.getPosicionX();
+        int py = explorador.getPosicionY();
+
+        // buscar si hay algun obstaculo en la casilla del personaje o casillas adyacentes
+        for (Obtaculo obtaculo : nivelActual.getObtaculos()){
+            // si el obstaculo esta en la misma posición o cerca
+            if (!obtaculo.isDestruido() && Math.abs(obtaculo.getPosicionX() - px) <= 1 && Math.abs(obtaculo.getPosicionY() - py) <= 1){
+                obtaculo.destruye();
+                return obtaculo;
+            }
+        }
+        return null;
+    }
+    // enviara mensaje a la interfaz gráfica para mostrar mensaje del ultimo evento
+    public String consumirUltimoEvento(){
+        String mensaje = ultimoEvento;
+        ultimoEvento = "";
+        return mensaje;
+    }
+
+    public void guardarProgresoEnElArchivo(){
+        Persistencia.guardarEstadoJuego(explorador, nivelActual, inventario, reaX, reaY, tieneCheckpointActivo);
+    }
+
+    public void reiniciarPartida(){
+        File archivo = new File("estado_juego.txt");
+        if(archivo.exists()){
+            archivo.delete();
+        }
+        iniciarJuego();
+    }
+
+    public void restaurarDatosCheckpoint(int reaX, int reaY, boolean tieneCheckpoint){
+        this.reaX = reaX;
+        this.reaY = reaY;
+        this.tieneCheckpointActivo = tieneCheckpoint;
+    }
+
+    public void setEstadoCargado(Personaje explorador, Nivel nivel, Inventario inventario){
+        this.explorador = explorador;
+        this.nivelActual = nivel;
+        this.inventario = inventario;
+    }
 }

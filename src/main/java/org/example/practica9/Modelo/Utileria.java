@@ -41,6 +41,10 @@ public class Utileria implements ElementoDinamico {
         System.out.println("Utilería " + nombre + " utilizada: " + descripcion);
     }
 
+    public void setUsada(boolean usada){
+        this.usada = usada;
+    }
+
     @Override
     public void mover(String direccion, int distancia) {
         // desplaza la utileria según dirección y distancia

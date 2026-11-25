@@ -1,0 +1,23 @@
+Explorador; Explorador;100;0;0;0;0;false
+Arma;Hacha;20;2.0
+Arma;Arco;25;10.0
+Recompensa;Moneda;50;Oro
+Recompensa;Gema Verde;100;Tesoro
+Checkpoint;Campamento1;-4;3;false
+Checkpoint;Campamento2;5;-4;false
+Obstaculo;Roca1;15;2;-5;false
+Obstaculo;Roca2;15;4;-1;false
+Obstaculo;Roca3;15;5;-1;false
+Obstaculo;Roca4;15;2;1;false
+Obstaculo;Árbol caído1;10;-2;-1;false
+Obstaculo;Árbol caído2;10;-3;5;false
+Obstaculo;Árbol caído3;10;-4;-5;false
+Obstaculo;Árbol caído4;10;3;-4;false
+Utileria;Arbol1;Decoración;-6;-5;false
+Utileria;Arbol2;Decoración;4;6;false
+Utileria;Arbol3;Decoración;-6;5;false
+Utileria;Arbol4;Decoración;0;6;false
+Utileria;Flor1;Flor silvestre;3;-3;false
+Utileria;Flor2;Flor silvestre;-1;4;false
+Utileria;Flor3;Flor silvestre;-6;-4;false
+Utileria;Flor4;Flor silvestre;1;-3;false

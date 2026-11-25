@@ -83,4 +83,8 @@ public class Personaje implements Destruible, ElementoDinamico {
     public boolean estaVivo(){
         return vida > 0;
     }
+
+    public void restaurarVida(int cantidad){
+        this.vida = cantidad;
+    }
 }

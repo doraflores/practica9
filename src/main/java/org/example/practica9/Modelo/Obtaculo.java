@@ -37,4 +37,12 @@ public class Obtaculo implements Destruible {
         destruido = true;
         System.out.println("El obstáculo " + nombre + " ha sido destruido.");
     }
+
+    public boolean isDestruido(){
+        return destruido;
+    }
+
+    public void setDestruido(boolean destruido){
+        this.destruido = destruido;
+    }
 }
