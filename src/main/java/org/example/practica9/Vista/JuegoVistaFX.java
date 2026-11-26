@@ -204,7 +204,7 @@ public class JuegoVistaFX extends Application {
         // OBSTÁCULOS (Rojo / Marrón)
         // Roca Gigante, Árbol Caído
         // Dibujar Obstáculos desde la lista del Nivel
-        for (Obtaculo obstaculos : controlador.getNivelActual().getObtaculos()) {
+        for (Obstaculo obstaculos : controlador.getNivelActual().getObstaculos()) {
             if(!obstaculos.isDestruido()){
                 Color color = obstaculos.getNombre().startsWith("Roca") ? Color.web("#f38ba8") : Color.web("#eba0ac");
                 String figura = obstaculos.getNombre().startsWith("Roca") ? "ROCA" : "TRONCO";
@@ -310,7 +310,7 @@ public class JuegoVistaFX extends Application {
         if (controlador.isJuegoTerminado()){
             return;
         }
-        Obtaculo objetivo = controlador.usarArmaParaDestruir();
+        Obstaculo objetivo = controlador.usarArmaParaDestruir();
         if (objetivo != null) {
             // calcular pixeles de origen (Explorador) y destino (Obstaculo)
             double origenX = exploradorGrafico.getLayoutX() + 13;

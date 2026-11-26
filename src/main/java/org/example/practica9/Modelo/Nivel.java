@@ -10,7 +10,7 @@ public class Nivel {
     private String nombre;
     private int numero;
     private String dificultad;
-    private List<Obtaculo> obtaculos;
+    private List<Obstaculo> obstaculos;
     private List<CheckPoint> checkPoints;
     private List<ElementoDinamico> elementosDinamicos;
     private Inventario inventario;
@@ -20,7 +20,7 @@ public class Nivel {
         this.numero = numero;
         this.dificultad = dificultad;
         this.inventario = inventario;
-        this.obtaculos = new ArrayList<>();
+        this.obstaculos = new ArrayList<>();
         this.checkPoints = new ArrayList<>();
         this.elementosDinamicos = new ArrayList<>();
     }
@@ -40,7 +40,7 @@ public class Nivel {
             agregarCheckPoint(new CheckPoint("Campamento " + (i + 1), checkpointX, checkpointY));
         }
 
-        // colocacion de obtaculos
+        // colocacion de obstaculos
         // rocas
         for (int i = 1; i <= 4; i++){
             int x;
@@ -50,7 +50,7 @@ public class Nivel {
                 y = rmd.nextInt(13) - 6;
             } while (posicionesOcupadas.contains(x + "," + y));
             posicionesOcupadas.add(x + "," + y);
-            agregarObstaculo(new Obtaculo("Roca" + i, 15, x, y));
+            agregarObstaculo(new Obstaculo("Roca" + i, 15, x, y));
         }
         // arboles caidos
         for (int i = 1; i <= 4; i++){
@@ -61,7 +61,7 @@ public class Nivel {
                 y = rmd.nextInt(13) - 6;
             } while (posicionesOcupadas.contains(x + "," + y));
             posicionesOcupadas.add(x + "," + y);
-            agregarObstaculo(new Obtaculo("Árbol caído" + i, 10, x, y));
+            agregarObstaculo(new Obstaculo("Árbol caído" + i, 10, x, y));
         }
         // colocacion de utileria
         // arboles decorativos
@@ -134,9 +134,9 @@ public class Nivel {
         return dificultad;
     }
 
-    public void agregarObstaculo(Obtaculo obtaculo){
+    public void agregarObstaculo(Obstaculo obstaculo){
         // añade un obstaculo al nivel
-        obtaculos.add(obtaculo);
+        obstaculos.add(obstaculo);
     }
 
     public void agregarCheckPoint(CheckPoint checkPoint){
@@ -168,7 +168,7 @@ public class Nivel {
     public void mostrarEstado(){
         // muestra el estado actual del nivel
         System.out.println("Nivel " + numero + ": " + nombre + "(Dificultad: " + dificultad + ")");
-        System.out.println("Obstáculos en el nivel: " + obtaculos.size());
+        System.out.println("Obstáculos en el nivel: " + obstaculos.size());
         System.out.println("Checkpoints dinámicos: " + checkPoints.size());
         System.out.println("Elementos dinámicos: " + elementosDinamicos.size());
         if(inventario != null){
@@ -177,8 +177,8 @@ public class Nivel {
     }
 
     // getters añadidos
-    public List<Obtaculo> getObtaculos(){
-        return obtaculos;
+    public List<Obstaculo> getObstaculos(){
+        return obstaculos;
     }
 
     public List<CheckPoint> getCheckPoints(){

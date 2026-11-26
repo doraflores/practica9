@@ -38,8 +38,8 @@ public class Persistencia {
             }
 
             // guardar obstaculos
-            for (Obtaculo obtaculo : nivel.getObtaculos()) {
-                writer.write("Obstaculo;" + obtaculo.getNombre() + ";" + obtaculo.getDano() + ";" + obtaculo.getPosicionX() + ";" + obtaculo.getPosicionY() + ";" + obtaculo.isDestruido());
+            for (Obstaculo obstaculo : nivel.getObstaculos()) {
+                writer.write("Obstaculo;" + obstaculo.getNombre() + ";" + obstaculo.getDano() + ";" + obstaculo.getPosicionX() + ";" + obstaculo.getPosicionY() + ";" + obstaculo.isDestruido());
                 writer.newLine();
             }
 
@@ -95,9 +95,9 @@ public class Persistencia {
                         nivel.agregarCheckPoint(checkPoint);
                         break;
                     case "Obstaculo":
-                        Obtaculo obtaculo = new Obtaculo(datos[1], Integer.parseInt(datos[2]), Integer.parseInt(datos[3]), Integer.parseInt(datos[4]));
-                        obtaculo.setDestruido(Boolean.parseBoolean(datos[5]));
-                        nivel.agregarObstaculo(obtaculo);
+                        Obstaculo obstaculo = new Obstaculo(datos[1], Integer.parseInt(datos[2]), Integer.parseInt(datos[3]), Integer.parseInt(datos[4]));
+                        obstaculo.setDestruido(Boolean.parseBoolean(datos[5]));
+                        nivel.agregarObstaculo(obstaculo);
                         break;
                     case "Utileria":
                         Utileria utileria = new Utileria(datos[1], datos[2], Integer.parseInt(datos[3]), Integer.parseInt(datos[4]));

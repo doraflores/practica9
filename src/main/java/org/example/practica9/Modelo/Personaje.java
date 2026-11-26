@@ -123,18 +123,18 @@ public class Personaje implements Destruible, ElementoDinamico {
     }
 
     // metodo basado en verificarEstadoCasilla del controlador
-    public Obtaculo verificarColisionObstaculos(List<Obtaculo> obstaculos){
-        for (Obtaculo obtaculo : obstaculos){
-            if (!obtaculo.isDestruido() && obtaculo.getPosicionX() == posicionX && obtaculo.getPosicionY() == posicionY){
-                recibirDano(obtaculo.getDano());
-                return obtaculo; // devuelve el obstaculo con el que choco para informar a la vista
+    public Obstaculo verificarColisionObstaculos(List<Obstaculo> obstaculos){
+        for (Obstaculo obstaculo : obstaculos){
+            if (!obstaculo.isDestruido() && obstaculo.getPosicionX() == posicionX && obstaculo.getPosicionY() == posicionY){
+                recibirDano(obstaculo.getDano());
+                return obstaculo; // devuelve el obstaculo con el que choco para informar a la vista
             }
         }
         return null; // devuelve que no choco con ningun obstaculo
     }
 
     // metodo basado en atacar los obstaculos del controlador
-    public Obtaculo atacarObstaculoCercano(List<Obtaculo> obstaculos){
+    public Obstaculo atacarObstaculoCercano(List<Obstaculo> obstaculos){
         if (inventario == null){
             return null; // inventario vacio
         }
@@ -142,7 +142,7 @@ public class Personaje implements Destruible, ElementoDinamico {
         if (arma == null){
             return null; // no hay arma
         }
-        for (Obtaculo obstaculo : obstaculos){
+        for (Obstaculo obstaculo : obstaculos){
             if (!obstaculo.isDestruido() && Math.abs(obstaculo.getPosicionX() - posicionX) <= 1 &&
             Math.abs(obstaculo.getPosicionY() - posicionY) <= 1){
                 obstaculo.destruye();

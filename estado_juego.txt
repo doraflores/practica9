@@ -4,20 +4,20 @@ Arma;Arco;25;10.0
 Recompensa;Moneda;50;Oro
 Recompensa;Gema Verde;100;Tesoro
 Checkpoint;Campamento 1;-4;3;true
-Checkpoint;Campamento 2;5;-4;false
-Obstaculo;Roca1;15;-5;-6;false
-Obstaculo;Roca2;15;2;1;false
-Obstaculo;Roca3;15;3;5;false
-Obstaculo;Roca4;15;-5;0;false
-Obstaculo;Árbol caído1;10;4;-1;false
-Obstaculo;Árbol caído2;10;3;6;false
-Obstaculo;Árbol caído3;10;5;1;false
-Obstaculo;Árbol caído4;10;3;-6;false
-Utileria;Arbol1;Decoración;1;5;false
-Utileria;Arbol2;Decoración;-3;5;false
-Utileria;Arbol3;Decoración;4;2;false
-Utileria;Arbol4;Decoración;4;-5;false
-Utileria;Flor1;Flor silvestre;2;-6;false
-Utileria;Flor2;Flor silvestre;-2;-1;false
-Utileria;Flor3;Flor silvestre;-1;-5;false
-Utileria;Flor4;Flor silvestre;6;-1;false
+Checkpoint;Campamento 2;5;-4;true
+Obstaculo;Roca1;15;-3;4;false
+Obstaculo;Roca2;15;0;-2;false
+Obstaculo;Roca3;15;-3;2;false
+Obstaculo;Roca4;15;4;1;false
+Obstaculo;Árbol caído1;10;-2;-2;false
+Obstaculo;Árbol caído2;10;2;5;false
+Obstaculo;Árbol caído3;10;0;-5;false
+Obstaculo;Árbol caído4;10;-6;2;false
+Utileria;Arbol1;Decoración;-5;-1;false
+Utileria;Arbol2;Decoración;0;2;false
+Utileria;Arbol3;Decoración;-3;-3;false
+Utileria;Arbol4;Decoración;4;-6;false
+Utileria;Flor1;Flor silvestre;-2;3;false
+Utileria;Flor2;Flor silvestre;-5;-3;false
+Utileria;Flor3;Flor silvestre;-2;-4;false
+Utileria;Flor4;Flor silvestre;1;-5;false

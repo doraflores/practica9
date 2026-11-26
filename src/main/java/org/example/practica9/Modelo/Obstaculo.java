@@ -1,13 +1,13 @@
 package org.example.practica9.Modelo;
 
-public class Obtaculo implements Destruible {
+public class Obstaculo implements Destruible {
     private String nombre;
     private int dano;
     private int posicionX;
     private int posicionY;
     private boolean destruido;
 
-    public Obtaculo(String nombre, int dano, int x, int y){
+    public Obstaculo(String nombre, int dano, int x, int y){
         this.nombre = nombre;
         this.dano = dano;
         this.posicionX = x;

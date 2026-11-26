@@ -93,7 +93,7 @@ public class JuegoControlador {
 
     private void verificarInteraccionConCasilla(int x, int y) {
         // Interacción con Obstáculos (el personaje verififica la colision)
-        Obtaculo obstaculoChocado = explorador.verificarColisionObstaculos(nivelActual.getObtaculos());
+        Obstaculo obstaculoChocado = explorador.verificarColisionObstaculos(nivelActual.getObstaculos());
         if (obstaculoChocado != null) {
             this.ultimoEvento = "¡Chocaste con " + obstaculoChocado.getNombre() + "! (-" + obstaculoChocado.getDano() + " HP";
         }
@@ -141,12 +141,12 @@ public class JuegoControlador {
         return mensajeFinal;
     }
 
-    public Obtaculo usarArmaParaDestruir(){
+    public Obstaculo usarArmaParaDestruir(){
         if(juegoTerminado){
             return null;
         }
 
-        return explorador.atacarObstaculoCercano(nivelActual.getObtaculos());
+        return explorador.atacarObstaculoCercano(nivelActual.getObstaculos());
     }
     // enviara mensaje a la interfaz gráfica para mostrar mensaje del ultimo evento
     public String consumirUltimoEvento(){
