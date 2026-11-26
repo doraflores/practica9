@@ -3,7 +3,6 @@ package org.example.practica9.Modelo;
 import org.example.practica9.Controlador.JuegoControlador;
 
 import java.io.*;
-import java.util.Random;
 
 public class Persistencia {
     private static final String ARCHIVO_CONFIGURACION = "estado_juego.txt";
@@ -14,14 +13,14 @@ public class Persistencia {
     }
 
     // guardar la configuración actual del juego en el archivo de texto
-    public static void guardarEstadoJuego(Personaje explorador, Nivel nivel, Inventario inventario, int reaX, int reaY, boolean tieneCheckPoint) {
+    public static void guardarEstadoJuego(Personaje explorador, Nivel nivel) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARCHIVO_CONFIGURACION))) {
             // guarda los datos del explorador posicionado en el ultimo checkpoint que activo
-            writer.write("Explorador; " + explorador.getNombre() + ";" + explorador.getVida() + ";" + reaX + ";" + reaY + ";" + reaX + ";" + reaY + ";" + tieneCheckPoint);
+            writer.write("Explorador; " + explorador.getNombre() + ";" + explorador.getVida() + ";" + explorador.getReaX() + ";" + explorador.getReaY() + ";" + explorador.getReaX() + ";" + explorador.getReaY() + ";" + explorador.isTieneCheckpointActivo());
             writer.newLine();
 
             //guardar inventariables (armas y recompenzas)
-            for (Inventariable item : inventario.getItems()) {
+            for (Inventariable item : explorador.getInventario().getItems()) {
                 if (item instanceof Arma) {
                     Arma arma = (Arma) item;
                     writer.write("Arma;" + arma.getNombre() + ";" + arma.getDano() + ";" + arma.getAlcance());
@@ -80,9 +79,9 @@ public class Persistencia {
                         int reaX = Integer.parseInt(datos[5]);
                         int reaY = Integer.parseInt(datos[6]);
                         boolean tieneCP = Boolean.parseBoolean(datos[7]);
-                        explorador = new Personaje(nombre, vida, posX, posY);
+                        explorador = new Personaje(nombre, vida, posX, posY, inventario1);
+                        explorador.restaurarDatosCheckpoint(reaX, reaY, tieneCP);
                         nivel.agregarElementoDinamico(explorador);
-                        controlador.restaurarDatosCheckpoint(reaX, reaY, tieneCP);
                         break;
                     case "Arma":
                         inventario1.agregarItem(new Arma(datos[1], Integer.parseInt(datos[2]), Double.parseDouble(datos[3])));
@@ -107,12 +106,20 @@ public class Persistencia {
                         break;
                 }
             }
-            controlador.setEstadoCargado(explorador, nivel, inventario1);
+            controlador.setEstadoCargado(explorador, nivel);
             System.out.println("Configuración leida y restaurada desde " + ARCHIVO_CONFIGURACION);
             return true;
         } catch (IOException e) {
             System.err.println("Error al leer el archivo" + e.getMessage());
             return false;
+        }
+    }
+
+    // eliminar archivo
+    public static void eliminarArchivoGuardado(){
+        File archivo = new File(ARCHIVO_CONFIGURACION);
+        if (archivo.exists()){
+            archivo.delete();
         }
     }
 }

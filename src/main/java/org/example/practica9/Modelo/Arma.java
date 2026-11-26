@@ -1,6 +1,5 @@
 package org.example.practica9.Modelo;
 
-
 public class Arma implements Inventariable {
     private String nombre;
     private int dano;

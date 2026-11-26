@@ -46,4 +46,14 @@ public class Inventario {
             System.out.println("- " + item.toString());
         }
     }
+
+    // metodo basado en usar armaParaDestruir() del controlador
+    public Arma obtenerArmaDisponible(){
+        for (Inventariable item : items){
+            if (item instanceof  Arma){
+                return (Arma) item;
+            }
+        }
+        return null;
+    }
 }
